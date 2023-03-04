@@ -61,7 +61,7 @@ class Home extends StatelessWidget {
 
 ### Ios Info.plist
 
-```plist
+```xml
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>App need to access to your location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
@@ -74,4 +74,16 @@ class Home extends StatelessWidget {
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.INTERNET"/>
+```
+
+### Depencies
+
+```yml
+dio: 
+dio_logging_interceptor:
+flutter_map:
+freezed_annotation: 
+geolocator: 
+latlong2: 
+rxdart: 
 ```
