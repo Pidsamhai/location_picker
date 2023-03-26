@@ -8,7 +8,6 @@ import '../model/longdo/search/reverse_geo_code.dart';
 import '../model/longdo/search/search_location.dart';
 import '../repository/longdo_repository.dart';
 import 'custom_coordinate_dialog.dart';
-import 'on_ready_mixin.dart';
 import 'package:rxdart/rxdart.dart' as rx;
 
 import 'spacer_box.dart';
@@ -24,6 +23,8 @@ class LocationPickerWidget extends StatefulWidget {
   final bool customCoordinate;
   final bool log;
   final Function(ReverseGeoCode reverseGeoCode, LatLng latLng)? onSelected;
+  final LatLng? defaultLocation;
+  final bool loadMyPosition;
   const LocationPickerWidget({
     Key? key,
     required this.apiKey,
@@ -36,6 +37,8 @@ class LocationPickerWidget extends StatefulWidget {
     this.searchDebounceDuration = const Duration(seconds: 1),
     this.customCoordinate = false,
     this.log = true,
+    this.defaultLocation,
+    this.loadMyPosition = true,
   }) : super(key: key);
 
   @override
@@ -43,14 +46,20 @@ class LocationPickerWidget extends StatefulWidget {
 }
 
 class _LocationPickerWidgetState extends State<LocationPickerWidget>
-    with TickerProviderStateMixin, OnReadyMixin {
-  late final LatLng? defaultLocation =
-      ModalRoute.of(context)?.settings.arguments as dynamic;
-
+    with TickerProviderStateMixin {
   late final animController = AnimationController(
     duration: const Duration(milliseconds: 700),
     vsync: this,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      animController.repeat(reverse: true);
+      initListener();
+    });
+  }
 
   void notifyListeners() {
     if (mounted) {
@@ -123,7 +132,7 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget>
     _currentPosition.sink.add(mapController.center);
   }
 
-  void init() {
+  void initListener() {
     _searchResult$ = searchResult.listen(
       (event) {
         searchResultList.clear();
@@ -143,13 +152,22 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget>
       onError: (e) => isLoadReverse = false,
     );
 
-    if (defaultLocation != null) {
-      mapController.move(
-        defaultLocation!,
-        15,
-      );
-      _currentPosition.sink.add(defaultLocation!);
+    if (widget.defaultLocation == null) {
+      if (widget.loadMyPosition) {
+        moveToMyPosition();
+      }
+      return;
     }
+
+    moveToDefaultLocation();
+  }
+
+  moveToDefaultLocation() {
+    mapController.move(
+      widget.defaultLocation!,
+      15,
+    );
+    _currentPosition.sink.add(widget.defaultLocation!);
   }
 
   showError(String msg) {
@@ -223,12 +241,6 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget>
     if (result != null) {
       moveByLatLong(result);
     }
-  }
-
-  @override
-  void onReady() {
-    animController.repeat(reverse: true);
-    init();
   }
 
   @override
