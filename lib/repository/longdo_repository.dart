@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:dio_logging_interceptor/dio_logging_interceptor.dart';
+// import 'package:dio_logging_interceptor/dio_logging_interceptor.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../model/longdo/search/reverse_geo_code.dart';
 import '../model/longdo/search/search_location.dart';
@@ -12,9 +13,14 @@ class LongdoRepository {
   LongdoRepository(this._apiKey, this._locale, bool log) {
     if (log) {
       _client.interceptors.add(
-        DioLoggingInterceptor(
-          level: Level.body,
+        PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
           compact: true,
+          maxWidth: 90,
         ),
       );
     }

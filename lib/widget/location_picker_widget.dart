@@ -264,10 +264,7 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget>
             mapController: mapController,
             options: MapOptions(
               interactiveFlags: InteractiveFlag.all,
-              center: LatLng(
-                16.425570308121475,
-                101.15399532786927,
-              ),
+              center: widget.defaultLocation,
               onPointerUp: (event, point) {
                 animController.repeat(reverse: true);
                 moveToCurrentCenter();
@@ -321,6 +318,15 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget>
                         hintText: widget.searchLabel,
                         contentPadding: const EdgeInsets.all(16),
                         prefixIcon: widget.searchIcon,
+                        suffixIcon: searchKeywordController.text.isNotEmpty
+                            ? IconButton(
+                                onPressed: () {
+                                  searchKeywordController.clear();
+                                  searchKeyword.sink.add("");
+                                },
+                                icon: const Icon(Icons.clear),
+                              )
+                            : null,
                       ),
                     ),
                     if (isLoadSearch) ...[
@@ -404,10 +410,11 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget>
     }
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      height: 200,
+      constraints: const BoxConstraints(maxHeight: 200),
       child: ListView.builder(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: searchResultList.length,
+        shrinkWrap: true,
         itemBuilder: (context, index) {
           return ListTile(
             onTap: () {
